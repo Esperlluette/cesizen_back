@@ -2,14 +2,19 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AppUserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
+#[ApiResource]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -53,7 +58,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $acct_created_date = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $acct_last_update_date = null;
 
     #[ORM\Column]
@@ -70,6 +75,20 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Profile $profile = null;
+
+    /**
+     * @var Collection<int, Page>
+     */
+    #[ORM\OneToMany(targetEntity: Page::class, mappedBy: 'created_by', orphanRemoval: true)]
+    private Collection $pages;
+
+    #[ORM\OneToOne(mappedBy: 'updated_by', cascade: ['persist', 'remove'])]
+    private ?Page $pages_updated = null;
+
+    public function __construct()
+    {
+        $this->pages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -296,6 +315,58 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function setProfile(?Profile $profile): static
     {
         $this->profile = $profile;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Page>
+     */
+    public function getPages(): Collection
+    {
+        return $this->pages;
+    }
+
+    public function addPage(Page $page): static
+    {
+        if (!$this->pages->contains($page)) {
+            $this->pages->add($page);
+            $page->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removePage(Page $page): static
+    {
+        if ($this->pages->removeElement($page)) {
+            // set the owning side to null (unless already changed)
+            if ($page->getCreatedBy() === $this) {
+                $page->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getPagesUpdated(): ?Page
+    {
+        return $this->pages_updated;
+    }
+
+    public function setPagesUpdated(?Page $pages_updated): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($pages_updated === null && $this->pages_updated !== null) {
+            $this->pages_updated->setUpdatedBy(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($pages_updated !== null && $pages_updated->getUpdatedBy() !== $this) {
+            $pages_updated->setUpdatedBy($this);
+        }
+
+        $this->pages_updated = $pages_updated;
 
         return $this;
     }
