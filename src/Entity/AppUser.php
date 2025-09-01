@@ -10,84 +10,190 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Get;
+use Symfony\Component\Serializer\Annotation\SerializedName;
+use App\Controller\GetMeController;
+use ApiPlatform\Metadata\Patch;
+use App\Controller\PatchMeController;
+use App\Controller\PatchMePasswordController;
+use App\Controller\Admin\ToggleUserStatusController;
+use ApiPlatform\Metadata\Delete;
+use App\Controller\Admin\SoftDeleteUserController;
 
 
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['user:read']]
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['user:create']],
+            normalizationContext: ['groups' => ['user:read']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['user:read']]
+        ),
+        new Get(
+            uriTemplate: '/me',
+            name: 'api_me',
+            controller: GetMeController::class,
+            read: false,
+            security: "is_granted('IS_AUTHENTICATED_FULLY')"
+        ),
+        new Patch(
+            uriTemplate: '/me',
+            controller: PatchMeController::class,
+            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            read: false,
+            write: false
+        ),
+        new Patch(
+            uriTemplate: '/me/password',
+            controller: PatchMePasswordController::class,
+            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            read: false,
+            write: false
+        ),
+        new GetCollection(
+            uriTemplate: '/admin/users',
+            security: "is_granted('ROLE_ADMIN')",
+            paginationEnabled: true
+        ),
+        new Get(
+            uriTemplate: '/admin/users/{id}',
+            security: "is_granted('ROLE_ADMIN')"
+        ),
+        new Patch(
+            uriTemplate: '/admin/users/{id}/status',
+            controller: ToggleUserStatusController::class,
+            security: "is_granted('ROLE_ADMIN')",
+            read: true,   // charge l'entité par {id}
+            write: false  // on gère le flush dans le contrôleur
+        ),
+        new Delete(
+            uriTemplate: '/admin/users/{id}',
+            controller: SoftDeleteUserController::class,
+            security: "is_granted('ROLE_ADMIN')",
+            read: true,   // charge l'entité par {id}
+            write: false  // on flush dans le contrôleur
+        ),
+    ]
+)]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Id, ORM\GeneratedValue, ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $username = null;
 
-    /**
-     * @var list<string> The user roles
-     */
+    /** @var list<string> */
     #[ORM\Column]
+    #[Groups(['user:create', 'user:read'])]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
+
+    /** @var string */
     #[ORM\Column]
     private ?string $password = null;
 
+
+    /** @var string */
+    /** Mot de passe en clair (pas mappé, write-only) */
+    #[Groups(['user:update', 'user:create'])]
+    #[SerializedName('password')]
+    private ?string $plainPassword = null;
+
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $country_from = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $city = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $birth_date = null;
+    #[Groups(['user:read', 'user:create'])]
+    private ?\DateTimeInterface $birth_date = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $acct_created_date = null;
+    #[Groups(['user:read'])]
+    private ?\DateTimeInterface $acct_created_date = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $acct_last_update_date = null;
+    #[Groups(['user:read'])]
+    private ?\DateTimeInterface $acct_last_update_date = null;
 
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?bool $is_active = null;
 
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?bool $is_suppressed = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read'])]
     private ?string $recover_code = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $recovery_date = null;
+    #[Groups(['user:read'])]
+    private ?\DateTimeInterface $recovery_date = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[Groups(['user:read'])]
     private ?Profile $profile = null;
 
     /**
      * @var Collection<int, Page>
      */
     #[ORM\OneToMany(targetEntity: Page::class, mappedBy: 'created_by', orphanRemoval: true)]
+    #[Groups(['user:read'])]
     private Collection $pages;
 
-    #[ORM\OneToOne(mappedBy: 'updated_by', cascade: ['persist', 'remove'])]
-    private ?Page $pages_updated = null;
 
+    #[ORM\OneToOne(mappedBy: 'updated_by', cascade: ['persist', 'remove'])]
+    #[Groups(['user:read'])]
+    private ?Page $pages_updated = null;
     public function __construct()
     {
         $this->pages = new ArrayCollection();
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+    public function setPlainPassword(?string $p): void
+    {
+        $this->plainPassword = $p;
+    }
+
+
+
+    public function eraseCredentials(): void
+    {
+        $this->plainPassword = null;
     }
 
     public function getId(): ?int
@@ -152,15 +258,6 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials(): void
-    {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 
     public function getEmail(): ?string
