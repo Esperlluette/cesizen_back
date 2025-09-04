@@ -83,6 +83,7 @@ use App\Controller\Admin\SoftDeleteUserController;
             read: true,   // charge l'entité par {id}
             write: false  // on flush dans le contrôleur
         ),
+
     ]
 )]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface

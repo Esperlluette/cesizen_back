@@ -3,11 +3,36 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\BreathExcerciesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
-#[ORM\Entity(repositoryClass: BreathExcerciesRepository::class)]
-#[ApiResource]
+#[ORM\Entity(repositoryClass: BreathExcerciesRepository::class,)]
+#[ApiResource(
+    operations: [
+        new Post(
+            security: "is_granted('ROLE_ADMIN')"
+        ),
+        new Patch(
+            security: "is_granted('ROLE_ADMIN')"
+        ),
+        new Get(),
+        new GetCollection(),
+        new GetCollection(
+            uriTemplate: '/GetRecommendations',
+            security: "is_granted('IS_AUTHENTICATED_FULLY')"
+        ),
+        new Delete(
+            security: "is_granted('ROLE_ADMIN')",
+        )
+    ]
+)]
 class BreathExcercies
 {
     #[ORM\Id]
@@ -16,18 +41,23 @@ class BreathExcercies
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[SerializedName("Title")]
     private ?string $title = null;
 
     #[ORM\Column]
+    #[SerializedName("TimerBreathIn")]
     private ?int $timer_breath_in = null;
 
     #[ORM\Column]
+    #[SerializedName("TimerBreathOut")]
     private ?int $timer_breath_out = null;
 
     #[ORM\Column]
+    #[SerializedName("TimerApnea")]
     private ?int $timer_apnea = null;
 
     #[ORM\Column]
+    #[SerializedName("isActive")]
     private ?bool $is_active = null;
 
     public function getId(): ?int
@@ -47,6 +77,7 @@ class BreathExcercies
         return $this;
     }
 
+    #[Ignore]
     public function getTimerBreathIn(): ?int
     {
         return $this->timer_breath_in;
@@ -59,6 +90,7 @@ class BreathExcercies
         return $this;
     }
 
+    #[Ignore]
     public function getTimerBreathOut(): ?int
     {
         return $this->timer_breath_out;
@@ -71,6 +103,7 @@ class BreathExcercies
         return $this;
     }
 
+    #[Ignore]
     public function getTimerApnea(): ?int
     {
         return $this->timer_apnea;
@@ -83,6 +116,7 @@ class BreathExcercies
         return $this;
     }
 
+    #[Ignore]
     public function isActive(): ?bool
     {
         return $this->is_active;
