@@ -1,21 +1,17 @@
-FROM php:8.3-zts-alpine
+FROM php:8.3-cli
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    git unzip zip \
+    && docker-php-ext-install pdo pdo_pgsql
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 WORKDIR /app
+COPY . .
 
-COPY . . 
-RUN apk update && apk upgrade -y 
-RUN apk dd wget git -y 
-RUN wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
-RUN mv composer.phar /usr/bin/composer
-RUN wget https://get.symfony.com/cli/installer -O - | sh 
-
-RUN wget https://get.symfony.com/cli/installer -O - | sh && \
-    mv /root/.symfony*/bin/symfony /usr/local/bin/symfony && \
-    chmod a+x /usr/local/bin/symfony
-
-RUN composer install
-
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 EXPOSE 8080
-
-
-CMD [ "symfony", "server:start", "--port", "8080"]
+CMD php bin/console doctrine:migrations:migrate --no-interaction && \
+    php -S 0.0.0.0:8080 -t public
