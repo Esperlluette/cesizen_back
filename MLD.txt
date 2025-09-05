@@ -1,0 +1,48 @@
++-------------+-----------------------------+---------+-----------------------+-----------------------------+----------+-------+-------+------------+-----------+------------+
+| schema_name |         table_name          | col_pos |        column         |            type             | nullable | is_pk | is_fk | ref_schema | ref_table | ref_column |
++-------------+-----------------------------+---------+-----------------------+-----------------------------+----------+-------+-------+------------+-----------+------------+
+| public      | app_user                    |       1 | id                    | integer                     | NO       | t     | f     |            |           |            |
+| public      | app_user                    |       2 | profile_id            | integer                     | YES      | f     | t     | public     | profile   | id         |
+| public      | app_user                    |       3 | username              | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |       4 | roles                 | json                        | NO       | f     | f     |            |           |            |
+| public      | app_user                    |       5 | password              | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |       6 | email                 | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |       7 | name                  | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |       8 | first_name            | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |       9 | country_from          | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      10 | city                  | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      11 | birth_date            | date                        | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      12 | acct_created_date     | date                        | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      13 | acct_last_update_date | date                        | YES      | f     | f     |            |           |            |
+| public      | app_user                    |      14 | is_active             | boolean                     | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      15 | is_suppressed         | boolean                     | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      16 | recover_code          | character varying           | NO       | f     | f     |            |           |            |
+| public      | app_user                    |      17 | recovery_date         | date                        | YES      | f     | f     |            |           |            |
+| public      | breath_excercies            |       1 | id                    | integer                     | NO       | t     | f     |            |           |            |
+| public      | breath_excercies            |       2 | title                 | character varying           | NO       | f     | f     |            |           |            |
+| public      | breath_excercies            |       3 | timer_breath_in       | integer                     | NO       | f     | f     |            |           |            |
+| public      | breath_excercies            |       4 | timer_breath_out      | integer                     | NO       | f     | f     |            |           |            |
+| public      | breath_excercies            |       5 | timer_apnea           | integer                     | NO       | f     | f     |            |           |            |
+| public      | breath_excercies            |       6 | is_active             | boolean                     | NO       | f     | f     |            |           |            |
+| public      | doctrine_migration_versions |       1 | version               | character varying           | NO       | t     | f     |            |           |            |
+| public      | doctrine_migration_versions |       2 | executed_at           | timestamp without time zone | YES      | f     | f     |            |           |            |
+| public      | doctrine_migration_versions |       3 | execution_time        | integer                     | YES      | f     | f     |            |           |            |
+| public      | menu                        |       1 | id                    | integer                     | NO       | t     | f     |            |           |            |
+| public      | menu                        |       2 | title                 | character varying           | NO       | f     | f     |            |           |            |
+| public      | menu                        |       3 | order_type            | integer                     | NO       | f     | f     |            |           |            |
+| public      | menu                        |       4 | is_active             | boolean                     | NO       | f     | f     |            |           |            |
+| public      | menu                        |       5 | creation_date         | date                        | NO       | f     | f     |            |           |            |
+| public      | menu                        |       6 | modification_date     | date                        | YES      | f     | f     |            |           |            |
+| public      | page                        |       1 | id                    | integer                     | NO       | t     | f     |            |           |            |
+| public      | page                        |       2 | created_by_id         | integer                     | NO       | f     | t     | public     | app_user  | id         |
+| public      | page                        |       3 | updated_by_id         | integer                     | YES      | f     | t     | public     | app_user  | id         |
+| public      | page                        |       4 | title                 | character varying           | NO       | f     | f     |            |           |            |
+| public      | page                        |       5 | content               | json                        | NO       | f     | f     |            |           |            |
+| public      | page                        |       6 | creation_date         | date                        | NO       | f     | f     |            |           |            |
+| public      | page                        |       7 | last_update_date      | date                        | YES      | f     | f     |            |           |            |
+| public      | page                        |       8 | is_active             | boolean                     | NO       | f     | f     |            |           |            |
+| public      | profile                     |       1 | id                    | integer                     | NO       | t     | f     |            |           |            |
+| public      | profile                     |       2 | code                  | character varying           | NO       | f     | f     |            |           |            |
+| public      | profile                     |       3 | label                 | character varying           | NO       | f     | f     |            |           |            |
++-------------+-----------------------------+---------+-----------------------+-----------------------------+----------+-------+-------+------------+-----------+------------+
+
