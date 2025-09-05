@@ -21,7 +21,7 @@ final class PatchMeController
         if (!$user) {
             throw new AccessDeniedHttpException('Not authenticated.');
         }
-
+        dd();
         $data = json_decode($request->getContent(), true) ?? [];
 
         // champs autorisés (simple et clair)
